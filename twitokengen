@@ -1,0 +1,55 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use utf8;
+use IO::Socket;
+use Net::Twitter::OAuth;
+
+my $consumer_key    = $ARGV[0] or die("usage: \$ twitokengen YOURCONSUMERKEY YOURCONSUMERSECRET");
+my $consumer_secret = $ARGV[1] or die("usage: \$ twitokengen YOURCONSUMERKEY YOURCONSUMERSECRET");
+
+my $tw = Net::Twitter::OAuth->new(
+	consumer_key    => $consumer_key,
+	consumer_secret => $consumer_secret,
+);
+
+my $url = $tw->get_authorization_url(
+	callback => "http://127.0.0.1:20080"
+);
+system("open ".$url);
+
+my $request_token        = $tw->request_token;
+my $request_token_secret = $tw->request_token_secret;
+
+my $socket0 = new IO::Socket::INET(
+	Listen    => 5,
+	LocalAddr => "127.0.0.1",
+	LocalPort => 20080,
+	Proto     => "tcp",
+	Reuse     => 1,
+);
+
+die "IO::Socket : $!" unless $socket0;
+
+my $socket = $socket0->accept();
+
+my $data = <$socket>;
+
+print $socket "HTTP/1.0 200 OK \r\n";
+print $socket "Content-Type: text/html\r\n";
+print $socket "Content-Length: 30\r\n";
+print $socket "\r\n";
+print $socket "Now go back to command line.\r\n";
+
+close($socket0);
+close($socket);
+
+$data =~ /oauth_verifier=(.*?) HTTP/;
+
+my $oauth_verifier = $1;
+
+my ($access_token, $access_token_secret, $user_id, $screen_name) = $tw->request_access_token(verifier => $oauth_verifier);
+
+print("access_token: '".$access_token."'\n");
+print("access_token_secret: '".$access_token_secret."'\n");
