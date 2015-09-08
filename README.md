@@ -5,7 +5,7 @@
 ## Usage
 
 ```sh
-$ twitokengen SDg9aghd4GnpdEh84GreNE SDGeoiaGEhEhfgHIUE54Fug832gfG0eGSwrT54GFweYT8dfgha
+$ twitokengen YOURCONSUMERKEY YOURCONSUMERSECRET
 ```
 
 Then web browser opens the url for authorization, login with Twitter, redirected to ```twitokengen```, and tokens will be shown.
